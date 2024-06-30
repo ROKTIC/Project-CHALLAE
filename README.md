@@ -46,7 +46,7 @@
 * Gradle
 
 #### Database
-* ORACLE
+* 기존 : Oracle, 변경 : MySQL / MariaDB
 
 ### 프론트엔드
 * Javascript
