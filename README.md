@@ -28,7 +28,6 @@
 
 ## :clipboard: 개발환경
 * IntelliJ
-* Postman
 * VsCode
 * GitHub
 
