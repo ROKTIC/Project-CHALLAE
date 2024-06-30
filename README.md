@@ -92,7 +92,9 @@
 
 
 ## :link: ERD 설계
-(https://www.erdcloud.com/d/HvoYGpFbmk8hRs6fT)
+
+<img width="1270" alt="erd" src="https://github.com/ROKTIC/Project-CHALLAE/assets/38402914/e685da4d-c5c1-42e1-92ac-363da0723fc9" width=80% height=80%>
+
 
 ## :link: 최종 자료 PDF 
 [Project_CHALLAE.pdf](https://github.com/user-attachments/files/15814180/Project_CHALLAE.pdf)
