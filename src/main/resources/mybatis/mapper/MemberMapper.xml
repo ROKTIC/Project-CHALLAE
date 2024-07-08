@@ -12,7 +12,7 @@
                             MEMBER_EMAIL,
                             MEMBER_PHOTO,
                             MEMBER_STOREDPHOTO)
-        VALUES (MEMBER_SEQ.NEXTVAL,
+        VALUES (NULL,  -- MySQL에서는 AUTO_INCREMENT 사용으로 NULL 값을 주어야 합니다.
                 #{id},
                 #{passwd},
                 #{name},
@@ -24,14 +24,14 @@
 
     <!-- 아이디로 회원 상세 조회 -->
     <select id="findById" parameterType="string" resultType="MemberDto">
-        SELECT member_id "id"
-        FROM member
-        WHERE member_id = #{id}
+        SELECT MEMBER_ID AS "id"
+        FROM MEMBER
+        WHERE MEMBER_ID = #{id}
     </select>
 
     <!-- 회원 정보 수정 -->
     <update id="update" parameterType="com.ezen.springmvc.domain.member.dto.MemberDto">
-        UPDATE member
+        UPDATE MEMBER
         SET MEMBER_EMAIL  = #{email},
             MEMBER_PASSWD = #{passwd}
         WHERE MEMBER_ID = #{id}
@@ -39,12 +39,12 @@
 
     <!-- 회원 전체 조회 -->
     <select id="findByAll" resultType="MemberDto">
-        SELECT member_id "id",
-               MEMBER_NAME "name",
-               MEMBER_EMAIL "email",
-               TO_CHAR(regdate, 'YYYY-MM-DD HH24:MI:SS DAY') regdate
-        FROM member
-        ORDER BY regdate DESC
+        SELECT MEMBER_ID AS "id",
+               MEMBER_NAME AS "name",
+               MEMBER_EMAIL AS "email",
+               DATE_FORMAT(REGDATE, '%Y-%m-%d %H:%i:%s') AS regdate
+        FROM MEMBER
+        ORDER BY REGDATE DESC
     </select>
 
     <!-- 회원 로그인 -->
@@ -61,17 +61,16 @@
                c.CLUB_NAME          AS "clubName",
                c.STATUS             AS "status",
                m.MEMBER_PHONE       AS "phone"
-        FROM member m
+        FROM MEMBER m
                  LEFT JOIN
-             club c ON m.CLUB_NUM = c.CLUB_NUM
+             CLUB c ON m.CLUB_NUM = c.CLUB_NUM
         WHERE m.MEMBER_ID = #{id}
           AND m.MEMBER_PASSWD = #{passwd}
     </select>
 
-
     <!-- 회원 아이디 찾기 검색 -->
     <select id="findId" parameterType="string" resultType="MemberDto">
-        SELECT MEMBER_ID "id"
+        SELECT MEMBER_ID AS "id"
         FROM MEMBER
         WHERE MEMBER_NAME = #{name}
           AND MEMBER_EMAIL = #{email}
@@ -79,9 +78,9 @@
 
     <!-- 회원 비밀번호 찾기  -->
     <select id="findMemberByIdNameEmail" parameterType="map" resultType="MemberDto">
-        SELECT MEMBER_ID "id", MEMBER_NAME "name", MEMBER_EMAIL "email"
+        SELECT MEMBER_ID AS "id", MEMBER_NAME AS "name", MEMBER_EMAIL AS "email"
         FROM MEMBER
-        WHERE member_id = #{id}
+        WHERE MEMBER_ID = #{id}
           AND MEMBER_NAME = #{name}
           AND MEMBER_EMAIL = #{email}
     </select>
@@ -102,12 +101,12 @@
     <!-- 전체 회원 목록 출력  -->
     <select id="viewAllMember" resultType="MemberDto">
         SELECT MEMBER_NUM,
-               MEMBER_ID          "id",
-               MEMBER_DIR         "dir",
-               MEMBER_NAME        "name",
-               MEMBER_PHONE       "phone",
-               MEMBER_EMAIL       "email",
-               MEMBER_STOREDPHOTO "storedProfile",
+               MEMBER_ID AS "id",
+               MEMBER_DIR AS "dir",
+               MEMBER_NAME AS "name",
+               MEMBER_PHONE AS "phone",
+               MEMBER_EMAIL AS "email",
+               MEMBER_STOREDPHOTO AS "storedProfile",
                CLUB_NUM
         FROM MEMBER
     </select>
@@ -121,136 +120,125 @@
 
     <!-- 클럽 생성 이후 멤버 테이블의 DIR 수정 -->
     <update id="updateMemberWithClubInfo" parameterType="int">
-        UPDATE Member
-        SET member_dir = 'Y'
+        UPDATE MEMBER
+        SET MEMBER_DIR = 'Y'
         WHERE MEMBER_NAME = (
-            SELECT club_president
-            FROM Club
-            WHERE club_num = #{clubNum}
+            SELECT CLUB_PRESIDENT
+            FROM CLUB
+            WHERE CLUB_NUM = #{clubNum}
         )
     </update>
 
-	<!-- 회원 아이디 또는 이름 회원 통합 검색 -->
-	<select id="findBySearchAll" parameterType="string"	resultType="MemberDto">
-		SELECT member_id "id", name, email, TO_CHAR(regdate, 'yyyy-MM-DD HH24:MI:SS') regdate
-		FROM member
-		WHERE member_id = #{value} OR name LIKE '%' || #{value} || '%'
-	</select>
+    <!-- 회원 아이디 또는 이름 회원 통합 검색 -->
+    <select id="findBySearchAll" parameterType="string" resultType="MemberDto">
+        SELECT MEMBER_ID AS "id", MEMBER_NAME AS "name", MEMBER_EMAIL AS "email", DATE_FORMAT(REGDATE, '%Y-%m-%d %H:%i:%s') AS regdate
+        FROM MEMBER
+        WHERE MEMBER_ID = #{value} OR MEMBER_NAME LIKE CONCAT('%', #{value}, '%')
+    </select>
 
-	<!-- 옵션 선택별 회원 통합 검색 -->
-	<select id="findBySearchAllOption" parameterType="MemberSearchCondition" resultType="MemberDto">
-		SELECT member_id "id", name, email, TO_CHAR(regdate, 'yyyy-MM-DD HH24:MI:SS') regdate
-		FROM member
-		<where>
-			<if test="memberId != null and memberId != ''">
-				or member_id = #{memberId}
-			</if>
-			<if test="name != null and name != ''">
-				or name LIKE '%' || #{name} || '%'
-			</if>
-			<if test="email != null and email != ''">
-				or email = #{email}
-			</if>
-		</where>
-	</select>
+    <!-- 옵션 선택별 회원 통합 검색 -->
+    <select id="findBySearchAllOption" parameterType="MemberSearchCondition" resultType="MemberDto">
+        SELECT MEMBER_ID AS "id", MEMBER_NAME AS "name", MEMBER_EMAIL AS "email", DATE_FORMAT(REGDATE, '%Y-%m-%d %H:%i:%s') AS regdate
+        FROM MEMBER
+        <where>
+            <if test="memberId != null and memberId != ''">
+                OR MEMBER_ID = #{memberId}
+            </if>
+            <if test="name != null and name != ''">
+                OR MEMBER_NAME LIKE CONCAT('%', #{name}, '%')
+            </if>
+            <if test="email != null and email != ''">
+                OR MEMBER_EMAIL = #{email}
+            </if>
+        </where>
+    </select>
 
-	<!-- 내 팀보기) 팀별 회원목록 출력 [이름, 직책, 번호] / 직책과 이름순으로 정렬	-->
-	<select id="myTeamList" resultType="MemberDto">
-		SELECT member_num, member_name "name", member_dir "dir", member_phone "phone", club_num
-		FROM (
-			SELECT CEIL(rownum / #{searchDto.limit}) page,
-				member_num,
-				member_name,
-				member_dir,
-				member_phone,
-				club_num
-		FROM (
-			SELECT member_num,
-			member_name,
-			member_dir,
-			member_phone,
-			club_num
-		FROM member
-		<where>
-			club_num = #{clubNum}
-			<if test="searchDto.searchValue != null">
-				AND member_name LIKE '%' || #{searchDto.searchValue} || '%'
-			</if>
-		</where>
-		ORDER BY
-			CASE
-				WHEN member_dir = 'Y' THEN 0
-				ELSE 1
-			END,
-			member_name ASC
-		)
-	)
-		WHERE page = #{searchDto.page}
-	</select>
+    <!-- 내 팀보기) 팀별 회원목록 출력 [이름, 직책, 번호] / 직책과 이름순으로 정렬 -->
+    <select id="myTeamList" resultType="MemberDto">
+        SELECT MEMBER_NUM, MEMBER_NAME AS "name", MEMBER_DIR AS "dir", MEMBER_PHONE AS "phone", CLUB_NUM
+        FROM (
+        SELECT
+        CEIL(ROW_NUMBER() OVER (ORDER BY
+        CASE
+        WHEN MEMBER_DIR = 'Y' THEN 0
+        ELSE 1
+        END,
+        MEMBER_NAME ASC) / #{searchDto.limit}) AS page,
+        MEMBER_NUM,
+        MEMBER_NAME,
+        MEMBER_DIR,
+        MEMBER_PHONE,
+        CLUB_NUM
+        FROM MEMBER
+        WHERE CLUB_NUM = #{clubNum}
+        <if test="searchDto.searchValue != null">
+            AND MEMBER_NAME LIKE CONCAT('%', #{searchDto.searchValue}, '%')
+        </if>
+        ) AS main
+        WHERE page = #{searchDto.page}
+    </select>
 
 
-	<!-- 클럽원 갯수 반환 (페이지네이션을 위함) -->
-	<select id="countMyTeamList" resultType="int">
-		SELECT
-		COUNT(member_id) "clubMembercount"
-		FROM
-		member
-		<where>
-			club_num = #{clubNum}
-			<if test="searchDto.searchValue != null">AND member_name LIKE '%' || #{searchDto.searchValue} || '%'</if>
-		</where>
-	</select>
+    <!-- 클럽원 갯수 반환 (페이지네이션을 위함) -->
+    <select id="countMyTeamList" resultType="int">
+        SELECT COUNT(MEMBER_ID) AS "clubMembercount"
+        FROM MEMBER
+        <where>
+            CLUB_NUM = #{clubNum}
+            <if test="searchDto.searchValue != null">
+                AND MEMBER_NAME LIKE CONCAT('%', #{searchDto.searchValue}, '%')
+            </if>
+        </where>
+    </select>
 
-    <!-- 클럽 생성 이후 멤버 테이블의 ClubNum 수정 -->
-    <update id="updateClubNumByPresident"  parameterType="int">
-        UPDATE member m
+    <!-- 클럽 생성 이후 멤버 테이블의 CLUB_NUM 수정 -->
+    <update id="updateClubNumByPresident" parameterType="int">
+        UPDATE MEMBER m
         SET m.CLUB_NUM = (
             SELECT c.CLUB_NUM
             FROM (
                      SELECT c.CLUB_NUM, c.CLUB_PRESIDENT,
-                            ROW_NUMBER() OVER (PARTITION BY c.CLUB_PRESIDENT ORDER BY c.CLUB_NUM) rn
-                     FROM club c
-                 ) c
+                            ROW_NUMBER() OVER (PARTITION BY c.CLUB_PRESIDENT ORDER BY c.CLUB_NUM) AS rn
+                     FROM CLUB c
+                 ) AS c
             WHERE c.CLUB_PRESIDENT = m.MEMBER_NAME AND c.rn = 1
         )
         WHERE m.MEMBER_NAME IN (
             SELECT c.CLUB_PRESIDENT
-            FROM club c
+            FROM CLUB c
             WHERE c.CLUB_NUM = #{clubNum}
         )
     </update>
 
-	<!-- 클럽원 강퇴 -->
-	<update id="ClubMemberDelete" parameterType="MemberDto">
-		UPDATE member
-		SET club_num= null
-		WHERE member_num = #{memberNum}
+    <!-- 클럽원 강퇴 -->
+    <update id="ClubMemberDelete" parameterType="MemberDto">
+        UPDATE MEMBER
+        SET CLUB_NUM = NULL
+        WHERE MEMBER_NUM = #{memberNum}
     </update>
 
-	<!--    클럽상세페이지 멤버목록 / club_detail 페이지 -->
-	<select id="clubMemberList" resultType="MemberDto">
-		SELECT CLUB_NUM, MEMBER_NUM, MEMBER_STOREDPHOTO "storedProfile", MEMBER_NAME "name",
-			   (CASE WHEN MEMBER_DIR = 'Y' THEN '클럽장' ELSE '클럽원' END) "dir"
-		FROM MEMBER
-		WHERE CLUB_NUM = #{clubNum}
-		ORDER BY MEMBER_DIR DESC
-	</select>
+    <!-- 클럽 상세 페이지 멤버 목록 / club_detail 페이지 -->
+    <select id="clubMemberList" resultType="MemberDto">
+        SELECT CLUB_NUM, MEMBER_NUM, MEMBER_STOREDPHOTO AS "storedProfile", MEMBER_NAME AS "name",
+               (CASE WHEN MEMBER_DIR = 'Y' THEN '클럽장' ELSE '클럽원' END) AS "dir"
+        FROM MEMBER
+        WHERE CLUB_NUM = #{clubNum}
+        ORDER BY MEMBER_DIR DESC
+    </select>
 
-	<!--    클럽 가입 승인(clubNum 업데이트) / club_join -->
-	<update id="clubJoinUpdateClubNum" parameterType="int">
-		UPDATE MEMBER
-		SET CLUB_NUM = (
-			SELECT CLUB_NUM
-			FROM CLUBJOINLIST
-			WHERE JOIN_NUM = #{joinNum}
-		)
-		WHERE MEMBER_NUM = (
-			SELECT MEMBER_NUM
-			FROM CLUBJOINLIST
-			WHERE JOIN_NUM = #{joinNum}
-		)
-
-	</update>
+    <!-- 클럽 가입 승인(clubNum 업데이트) / club_join -->
+    <update id="clubJoinUpdateClubNum" parameterType="int">
+        UPDATE MEMBER
+        SET CLUB_NUM = (
+            SELECT CLUB_NUM
+            FROM CLUBJOINLIST
+            WHERE JOIN_NUM = #{joinNum}
+        )
+        WHERE MEMBER_NUM = (
+            SELECT MEMBER_NUM
+            FROM CLUBJOINLIST
+            WHERE JOIN_NUM = #{joinNum}
+        )
+    </update>
 
 </mapper>
-

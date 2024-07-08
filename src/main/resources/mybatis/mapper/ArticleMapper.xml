@@ -4,17 +4,15 @@
 
     <!-- 게시글 등록 -->
     <insert id="create" parameterType="ArticleDto">
-        INSERT INTO ARTICLE (ARTICLE_NUM,
-                             ARTICLE_AUTHOR,
+        INSERT INTO ARTICLE (ARTICLE_AUTHOR,
                              ARTICLE_TITLE,
                              ARTICLE_CONTENT,
                              ARTICLE_DATE,
                              MEMBER_NUM)
-        VALUES (ARTICLE_SEQ.NEXTVAL,
-                #{articleAuthor},
+        VALUES (#{articleAuthor},
                 #{articleTitle},
                 #{articleContent},
-                SYSDATE,
+                NOW(),
                 #{memberNum})
     </insert>
 
@@ -25,16 +23,10 @@
         ARTICLE_NUM,
         ARTICLE_TITLE,
         ARTICLE_AUTHOR,
-        TO_CHAR(ARTICLE_DATE, 'YYYY-MM-DD HH24:MI') ARTICLE_DATE
+        DATE_FORMAT(ARTICLE_DATE, '%Y-%m-%d %H:%i') AS ARTICLE_DATE
         FROM (
         SELECT
-        CEIL(ROWNUM / #{limit}) AS page,
-        ARTICLE_NUM,
-        ARTICLE_TITLE,
-        ARTICLE_AUTHOR,
-        ARTICLE_DATE
-        FROM (
-        SELECT
+        CEIL(ROW_NUMBER() OVER (ORDER BY ARTICLE_DATE DESC) / #{limit}) AS page,
         ARTICLE_NUM,
         ARTICLE_TITLE,
         ARTICLE_AUTHOR,
@@ -44,14 +36,13 @@
             <if test="searchValue != null and searchValue != ''">
                 AND (
                 ARTICLE_AUTHOR = #{searchValue}
-                OR ARTICLE_TITLE LIKE '%' || #{searchValue} || '%'
-                OR ARTICLE_CONTENT LIKE '%' || #{searchValue} || '%'
+                OR ARTICLE_TITLE LIKE CONCAT('%', #{searchValue}, '%')
+                OR ARTICLE_CONTENT LIKE CONCAT('%', #{searchValue}, '%')
                 )
             </if>
         </where>
-        ORDER BY article_date DESC
-        )
-        )
+        ORDER BY ARTICLE_DATE DESC
+        ) AS subquery
         WHERE page = #{page}
     </select>
 
@@ -60,15 +51,14 @@
         SELECT ARTICLE_AUTHOR,
                ARTICLE_TITLE,
                ARTICLE_CONTENT,
-               TO_CHAR(ARTICLE_DATE, 'YY-MM-DD HH24:MI') ARTICLE_DATE,
+               DATE_FORMAT(ARTICLE_DATE, '%y-%m-%d %H:%i') AS ARTICLE_DATE,
                ARTICLE_NUM,
                MEMBER_NUM
         FROM ARTICLE
         WHERE ARTICLE_NUM = #{articleNum}
     </select>
 
-
-    <!--    게시글 삭제 -->
+    <!-- 게시글 삭제 -->
     <delete id="deleteArticle" parameterType="map">
         DELETE
         FROM ARTICLE
@@ -79,13 +69,13 @@
     <!-- 특정 게시판의 검색 조건에 따른 게시글 전체 갯수 반환 -->
     <select id="countBySearchCondition" resultType="int">
         SELECT
-        COUNT(ARTICLE_NUM) "cnt"
+        COUNT(ARTICLE_NUM) AS cnt
         FROM
         article
         <where>
             <if test="searchDto.searchValue != null">AND ARTICLE_AUTHOR = #{searchDto.searchValue}</if>
-            <if test="searchDto.searchValue != null">OR ARTICLE_TITLE LIKE '%' || #{searchDto.searchValue} || '%'</if>
-            <if test="searchDto.searchValue != null">OR ARTICLE_CONTENT LIKE '%' || #{searchDto.searchValue} || '%'</if>
+            <if test="searchDto.searchValue != null">OR ARTICLE_TITLE LIKE CONCAT('%', #{searchDto.searchValue}, '%')</if>
+            <if test="searchDto.searchValue != null">OR ARTICLE_CONTENT LIKE CONCAT('%', #{searchDto.searchValue}, '%')</if>
         </where>
     </select>
 

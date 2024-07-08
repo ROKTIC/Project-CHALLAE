@@ -1,49 +1,52 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTO Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ezen.springmvc.domain.match.mapper.CreateMapper">
+
     <!--  구장 정보 가져오기  -->
     <select id="findAllField" resultType="FieldDto">
-        select field_num, field_name
+        SELECT field_num, field_name
         FROM field
     </select>
 
     <!--  경기 일정 생성  -->
     <insert id="createMatch" parameterType="CreateDto">
-        INSERT INTO MATCH(match_num, match_date, match_info, match_time, club_num, field_num, match_photo)
-        VALUES (MATCH_SEQ.NEXTVAL, #{matchDate}, #{matchInfo}, #{matchTime}, #{clubNum}, #{fieldNum}, #{matchPhoto})
+        INSERT INTO `match` (match_date, match_info, match_time, club_num, field_num, match_photo)
+        VALUES (#{matchDate}, #{matchInfo}, #{matchTime}, #{clubNum}, #{fieldNum}, #{matchPhoto})
     </insert>
 
     <!--  로그인한 상태에서 같은 클럽원 목록(이름, 저장된 사진, 클럽 번호) 가져오기    -->
     <select id="findByClubNum" parameterType="int" resultType="MemberDto">
-        select member_name "name", member_storedphoto "storedProfile", club_num "clubNum"
-        from member
-        where club_num = #{value}
+        SELECT member_name AS name, member_storedphoto AS storedProfile, club_num AS clubNum
+        FROM member
+        WHERE club_num = #{value}
     </select>
-<!--    myteam 경기일정 출력 / 이동을 위한 매치번호 , 출력을 위한 날짜, 시간, 구장번호, 구장이름-->
-    <select id="clubMatchByClubNum"  resultType="ClubMatchDto">
-        SELECT match.match_num, match.match_date, match.match_time, match.club_num, match.field_num, field.field_name
-        FROM match
-                 JOIN field ON match.field_num = field.field_num
-        WHERE match.club_num = #{clubNum}
+
+    <!-- myteam 경기일정 출력 / 이동을 위한 매치번호 , 출력을 위한 날짜, 시간, 구장번호, 구장이름 -->
+    <select id="clubMatchByClubNum" resultType="ClubMatchDto">
+        SELECT `match`.match_num, `match`.match_date, `match`.match_time, `match`.club_num, `match`.field_num, field.field_name
+        FROM `match`
+                 JOIN field ON `match`.field_num = field.field_num
+        WHERE `match`.club_num = #{clubNum}
     </select>
-<!--    매치 일정 상세정보 매치 번호 / 출력 매치날짜, 매치시간, 전달사항, 전략판사진, 구장번호, 구장이름, 구장주소, 구장 좌표 (x,y)-->
+
+    <!-- 매치 일정 상세정보 매치 번호 / 출력 매치날짜, 매치시간, 전달사항, 전략판사진, 구장번호, 구장이름, 구장주소, 구장 좌표 (x,y) -->
     <select id="clubDetailByMatchNum" resultType="CreateDto">
-        SELECT match.match_num, match.match_date, match.match_time, match.match_info,match.match_photo, match.field_num, field.field_name, field.field_x, field.field_y, field.field_newaddress, field.field_oldaddress
-        FROM match
-                 JOIN field ON match.field_num = field.field_num
-        WHERE match.match_num = #{MatchNum}
+        SELECT `match`.match_num, `match`.match_date, `match`.match_time, `match`.match_info, `match`.match_photo, `match`.field_num, field.field_name, field.field_x, field.field_y, field.field_newaddress, field.field_oldaddress
+        FROM `match`
+                 JOIN field ON `match`.field_num = field.field_num
+        WHERE `match`.match_num = #{MatchNum}
     </select>
 
     <!-- 저장하기 버튼 눌렀을 때 매치보드 생성하기 -->
     <insert id="createMatchBoard" parameterType="MatchBoardDto">
-        INSERT INTO MATCHBOARD(mb_num, mb_name, mb_file, club_num, mb_type)
-        VALUES (MB_SEQ.NEXTVAL, #{mbName}, #{mbFile}, #{clubNum}, #{mbType})
+        INSERT INTO matchboard (mb_name, mb_file, club_num, mb_type)
+        VALUES (#{mbName}, #{mbFile}, #{clubNum}, #{mbType})
     </insert>
 
     <!-- 전략판 프리셋 저장할 때 동일한 프리셋 값이 이미 있으면 먼저 지우기 -->
     <delete id="deleteMatchBoard" parameterType="map">
         DELETE
-        FROM MATCHBOARD
+        FROM matchboard
         WHERE club_num = #{clubNum}
           AND mb_type = #{type}
     </delete>
@@ -51,9 +54,8 @@
     <!--  불러오기 눌렀을 때 해당 프리셋 가져오기  -->
     <select id="loadMatchBoard" parameterType="map" resultType="MatchBoardDto">
         SELECT mb_num, mb_name, mb_file, club_num, mb_type
-        FROM MATCHBOARD
+        FROM matchboard
         WHERE club_num = #{clubNum}
           AND mb_type = #{type}
     </select>
 </mapper>
-
