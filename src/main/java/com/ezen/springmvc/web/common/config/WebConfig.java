@@ -37,16 +37,16 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/upload/preset/**")  // upload/preset 으로 들어오는 요청들은 ↓ 밑의 주소로 ..
-                .addResourceLocations("file:/Applications/ezen-fullstack/workspace/Project-CHALLAE-main/src/main/upload/presetboard/");
+                .addResourceLocations("file:/Applications/ezen-fullstack/workspace/Project-CHALLAE-yir/src/main/upload/presetboard/");
 
         registry.addResourceHandler("/upload/profile/**")
-                .addResourceLocations("file:/Applications/ezen-fullstack/workspace/Project-CHALLAE-main/src/main/upload/profile/");
+                .addResourceLocations("file:/Applications/ezen-fullstack/workspace/Project-CHALLAE-yir/src/main/upload/profile/");
 
         registry.addResourceHandler("/upload/clublogo/**")
-                .addResourceLocations("file:/Applications/ezen-fullstack/workspace/Project-CHALLAE-main/src/main/upload/clublogo/");
+                .addResourceLocations("file:/Applications/ezen-fullstack/workspace/Project-CHALLAE-yir/src/main/upload/clublogo/");
 
         registry.addResourceHandler("/upload/soccerboard/**")
-                .addResourceLocations("file:/Applications/ezen-fullstack/workspace/Project-CHALLAE-main/src/main/upload/soccerboard/");
+                .addResourceLocations("file:/Applications/ezen-fullstack/workspace/Project-CHALLAE-yir/src/main/upload/soccerboard/");
     }
 }
 
